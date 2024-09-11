@@ -20,7 +20,7 @@ pub fn solve_challenge(challenge: &Challenge) -> anyhow::Result<Option<Solution>
     let c = challenge.max_capacity;
     let max_total_distance = challenge.max_total_distance;
     let n = challenge.difficulty.num_nodes;
-
+   
     // Clarke-Wright heuristic for node pairs based on their distances to depot
     let mut scores: Vec<(i32, usize, usize)> = Vec::with_capacity((n * (n - 1)) / 2);
     for i in 1..n {
