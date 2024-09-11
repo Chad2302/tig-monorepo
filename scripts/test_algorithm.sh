@@ -90,14 +90,14 @@ echo "Starting nonce: $start_nonce"
 echo "Number of nonces: $num_nonces"
 echo -ne ""
 for ((nonce=start_nonce; nonce<start_nonce+num_nonces; nonce++)); do
-    start_time=$(date +%s%3N)
+    start_time=$(gdate +%s%6N +%s%3N)
     stdout=$(mktemp)
     stderr=$(mktemp)
     ./target/release/tig-worker compute_solution "$SETTINGS" $nonce $REPO_DIR/tig-algorithms/wasm/$CHALLENGE/$ALGORITHM.wasm >"$stdout" 2>"$stderr"
     exit_code=$?
     output_stdout=$(cat "$stdout")
     output_stderr=$(cat "$stderr")
-    end_time=$(date +%s%3N)
+    end_time=$(gdate +%s%6N +%s%3N)
     duration=$((end_time - start_time))
     total_ms=$((total_ms + duration))
     if [ $exit_code -eq 0 ]; then
