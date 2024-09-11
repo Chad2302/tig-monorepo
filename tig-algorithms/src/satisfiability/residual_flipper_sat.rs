@@ -14,11 +14,10 @@ language governing permissions and limitations under the License.
 */
 
 use rand::{rngs::StdRng, Rng, SeedableRng};
-use std::collections::HashMap;
 use tig_challenges::satisfiability::*;
 
 pub fn solve_challenge(challenge: &Challenge) -> anyhow::Result<Option<Solution>> {
-    let mut rng = StdRng::seed_from_u64(challenge.seeds[0] as u64);
+    let mut rng = StdRng::seed_from_u64(challenge.seed as u64);
     let num_variables = challenge.difficulty.num_variables;
     let mut variables = vec![false; num_variables];
     let mut clauses = challenge.clauses.clone();
