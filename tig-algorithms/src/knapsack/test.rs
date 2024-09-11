@@ -20,15 +20,16 @@ pub fn solve_challenge(challenge: &Challenge) -> anyhow::Result<Option<Solution>
     let min_value = challenge.min_value as usize;
     let num_items = challenge.difficulty.num_items;
 
-    let weights: Vec<usize> = challenge.weights.iter().map(|weight| *weight as usize).collect();
-    let values: Vec<usize> = challenge.values.iter().map(|value| *value as usize).collect();
+    let weights: Vec<usize> = challenge.weights.iter().map(|&w| w as usize).collect();
+    let values: Vec<usize> = challenge.values.iter().map(|&v| v as usize).collect();
 
+    // Pre-compute value-to-weight ratios and sort items
     let mut sorted_items: Vec<(usize, f64)> = (0..num_items)
         .map(|i| (i, values[i] as f64 / weights[i] as f64))
         .collect();
     sorted_items.sort_unstable_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
 
-    // Early exit using a heuristic upper bound estimation
+    // Quick upper bound check
     let mut upper_bound = 0;
     let mut remaining_weight = max_weight;
     for &(item_index, ratio) in &sorted_items {
@@ -37,7 +38,7 @@ pub fn solve_challenge(challenge: &Challenge) -> anyhow::Result<Option<Solution>
 
         if item_weight <= remaining_weight {
             upper_bound += item_value;
-            remaining_weight -= item_weight;
+            remaining_weight = remaining_weight.saturating_sub(item_weight);
         } else {
             upper_bound += (ratio * remaining_weight as f64) as usize;
             break;
@@ -48,15 +49,16 @@ pub fn solve_challenge(challenge: &Challenge) -> anyhow::Result<Option<Solution>
         return Ok(None);
     }
 
-    // DP array and bitmask for state tracking
+    // Use a single vector for dynamic programming
     let mut dp = vec![0; max_weight + 1];
+    
+    // Use a more compact representation for tracking included items
     let mut included = vec![0u64; (num_items * (max_weight + 1) + 63) / 64];
 
     for (i, &(item_index, _)) in sorted_items.iter().enumerate() {
         let item_weight = weights[item_index];
         let item_value = values[item_index];
 
-        // Optimize inner loop by iterating in reverse to prevent overwriting current states
         for w in (item_weight..=max_weight).rev() {
             let new_value = dp[w - item_weight] + item_value;
             if new_value > dp[w] {
@@ -65,9 +67,9 @@ pub fn solve_challenge(challenge: &Challenge) -> anyhow::Result<Option<Solution>
             }
         }
 
+        // Early termination check
         if dp[max_weight] >= min_value {
-            // Early exit as soon as a valid solution is found
-            let mut selected_items = Vec::with_capacity(num_items);
+            let mut selected_items = Vec::with_capacity(i + 1);
             let mut w = max_weight;
             for j in (0..=i).rev() {
                 if (included[j * ((max_weight + 1) / 64) + w / 64] & (1u64 << (w % 64))) != 0 {
@@ -82,3 +84,23 @@ pub fn solve_challenge(challenge: &Challenge) -> anyhow::Result<Option<Solution>
 
     Ok(None)
 }
+
+#[cfg(feature = "cuda")]
+mod gpu_optimisation {
+    use super::*;
+    use cudarc::driver::*;
+    use std::{collections::HashMap, sync::Arc};
+    use tig_challenges::CudaKernel;
+
+    pub const KERNEL: Option<CudaKernel> = None;
+
+    pub fn cuda_solve_challenge(
+        challenge: &Challenge,
+        dev: &Arc<CudaDevice>,
+        mut funcs: HashMap<&'static str, CudaFunction>,
+    ) -> anyhow::Result<Option<Solution>> {
+        solve_challenge(challenge)
+    }
+}
+#[cfg(feature = "cuda")]
+pub use gpu_optimisation::{cuda_solve_challenge, KERNEL};
