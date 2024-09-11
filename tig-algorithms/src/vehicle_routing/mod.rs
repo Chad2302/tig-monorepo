@@ -14,7 +14,7 @@ mod tests {
             // -- satisfiability --
             // num_variables: 50,
             // clauses_to_variables_percent: 300,
-
+ 
             // -- vehicle_routing --
             num_nodes: 40,
             better_than_baseline: 250,
