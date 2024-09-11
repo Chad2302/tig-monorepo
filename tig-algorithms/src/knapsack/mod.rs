@@ -38,4 +38,4 @@ mod tests {
             Err(e) => println!("Algorithm error: {}", e),
         };
     }
-}
+} 
