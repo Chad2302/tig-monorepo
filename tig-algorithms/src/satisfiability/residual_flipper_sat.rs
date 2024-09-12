@@ -50,7 +50,7 @@ pub fn solve_challenge(challenge: &Challenge) -> anyhow::Result<Option<Solution>
                 num_good_so_far[c] += 1;
             }
         } else {
-            for &c in &n_clauses[v] {
+            for &c in &n_clauses[v] {  
                 num_good_so_far[c] += 1;
             }
         }
