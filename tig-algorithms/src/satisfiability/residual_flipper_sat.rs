@@ -54,7 +54,7 @@ pub fn solve_challenge(challenge: &Challenge) -> anyhow::Result<Option<Solution>
                 num_good_so_far[c] += 1;
             }
         }
-    }
+    }   
 
     // Initialize residual
     for (i, &num_good) in num_good_so_far.iter().enumerate() {
