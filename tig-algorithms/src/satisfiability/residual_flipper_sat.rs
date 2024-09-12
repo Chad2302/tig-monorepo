@@ -14,7 +14,6 @@ language governing permissions and limitations under the License.
 */
 
 use rand::{rngs::StdRng, Rng, SeedableRng};
-use std::collections::HashMap;  
 use tig_challenges::satisfiability::*;
 
 pub fn solve_challenge(challenge: &Challenge) -> anyhow::Result<Option<Solution>> {
