@@ -1,4 +1,5 @@
-// c008_a001
+pub mod ranked_arbiter;
+pub use ranked_arbiter as c008_a001;
 
 // c008_a002
 
